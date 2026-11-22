@@ -1,0 +1,11 @@
+# Exclude everything not needed in the published package
+test/
+api/
+public/
+vercel.json
+.gitignore
+.DS_Store
+.vscode/
+.idea/
+coverage/
+*.log

@@ -1,0 +1,47 @@
+{
+  "name": "vowel-counter-aditya",
+  "version": "1.0.0",
+  "description": "A lightweight, zero-dependency NPM package to count vowels in any string. Returns the total count and individual counts for A, E, I, O, U.",
+  "main": "index.js",
+  "module": "index.mjs",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.mjs",
+    "src/"
+  ],
+  "scripts": {
+    "test": "node --test test/countVowels.test.js",
+    "test:verbose": "node --test --test-reporter=spec test/countVowels.test.js",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "vowel",
+    "vowels",
+    "counter",
+    "count",
+    "string",
+    "text",
+    "utility",
+    "vowel-counter",
+    "text-analysis"
+  ],
+  "author": "Aditya Raj Singh",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rajsinghaditya/count-vowels.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rajsinghaditya/count-vowels/issues"
+  },
+  "homepage": "https://github.com/rajsinghaditya/count-vowels#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

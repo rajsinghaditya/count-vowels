@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vowel Counter — Live Demo</title>
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      padding: 3rem 1rem 1.5rem;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(90deg, #f7971e, #ffd200);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header p {
+      margin-top: .5rem;
+      color: #aaa;
+      font-size: 1.05rem;
+    }
+
+    /* ── Card ───────────────────────────────────────────────────────── */
+    .card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      width: min(560px, 92vw);
+      padding: 2rem;
+      margin-top: 1rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      font-size: 1rem;
+      padding: 1rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+    textarea:focus { border-color: #ffd200; }
+
+    button {
+      margin-top: 1rem;
+      width: 100%;
+      padding: .85rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #000;
+      background: linear-gradient(90deg, #f7971e, #ffd200);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    button:hover { opacity: .9; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Results ─────────────────────────────────────────────────────── */
+    .results {
+      display: none;
+      margin-top: 1.5rem;
+    }
+    .results.show { display: block; }
+
+    .total-badge {
+      text-align: center;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    .total-badge span {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #ffd200;
+    }
+
+    .vowel-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .75rem;
+    }
+    .vowel-cell {
+      text-align: center;
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 1rem .5rem;
+    }
+    .vowel-cell .letter {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #ffd200;
+    }
+    .vowel-cell .count {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: .25rem;
+    }
+
+    /* ── Error ───────────────────────────────────────────────────────── */
+    .error {
+      display: none;
+      margin-top: 1rem;
+      padding: .75rem 1rem;
+      background: rgba(255,60,60,0.15);
+      border: 1px solid rgba(255,60,60,0.3);
+      border-radius: 10px;
+      color: #ff6b6b;
+    }
+    .error.show { display: block; }
+
+    /* ── Info Section ────────────────────────────────────────────────── */
+    .info {
+      width: min(560px, 92vw);
+      margin: 2rem 0 3rem;
+      padding: 2rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+    }
+    .info h2 {
+      font-size: 1.3rem;
+      color: #ffd200;
+      margin-bottom: .75rem;
+    }
+    .info p, .info li {
+      color: #bbb;
+      line-height: 1.65;
+    }
+    .info ul { padding-left: 1.25rem; margin: .5rem 0; }
+    .info code {
+      background: rgba(255,255,255,0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: .92rem;
+    }
+    .info pre {
+      background: rgba(0,0,0,0.4);
+      padding: 1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: .75rem 0;
+      font-size: .9rem;
+      color: #ddd;
+    }
+
+    footer {
+      padding: 1.5rem;
+      text-align: center;
+      color: #666;
+      font-size: .85rem;
+    }
+    footer a { color: #ffd200; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🔤 Vowel Counter</h1>
+    <p>Type any text and instantly see the vowel breakdown</p>
+  </header>
+
+  <div class="card">
+    <textarea id="textInput" placeholder="Type or paste your text here…">Hello World</textarea>
+    <button id="countBtn">Count Vowels</button>
+
+    <div class="error" id="errorBox"></div>
+
+    <div class="results" id="results">
+      <div class="total-badge">Total Vowels: <span id="totalCount">0</span></div>
+      <div class="vowel-grid" id="vowelGrid"></div>
+    </div>
+  </div>
+
+  <div class="info">
+    <h2>📦 Use it in your project</h2>
+    <p>This demo is powered by the <strong>vowel-counter-aditya</strong> NPM package.</p>
+
+    <pre>npm install vowel-counter-aditya</pre>
+
+    <pre>const { countVowels } = require('vowel-counter-aditya');
+
+const result = countVowels('Hello World');
+console.log(result);
+// { total: 3, a: 0, e: 1, i: 0, o: 2, u: 0 }</pre>
+
+    <h2 style="margin-top:1.5rem;">✨ Features</h2>
+    <ul>
+      <li>Counts total vowels &amp; individual A, E, I, O, U</li>
+      <li>Case-insensitive — works with UPPER, lower, and MiXeD case</li>
+      <li>Ignores numbers, spaces, and special characters</li>
+      <li>Handles empty strings gracefully</li>
+      <li>Throws clear errors for invalid inputs</li>
+      <li>Zero dependencies — lightweight &amp; fast</li>
+    </ul>
+
+    <h2 style="margin-top:1.5rem;">🔗 API Endpoint</h2>
+    <p>Send a <code>POST</code> request to <code>/api/count</code> with a JSON body:</p>
+    <pre>POST /api/count
+Content-Type: application/json
+
+{ "text": "Hello World" }</pre>
+    <p>Response:</p>
+    <pre>{ "total": 3, "a": 0, "e": 1, "i": 0, "o": 2, "u": 0 }</pre>
+  </div>
+
+  <footer>
+    Built by <a href="#">Aditya Raj Singh</a> · vowel-counter-aditya
+  </footer>
+
+  <script>
+    const btn      = document.getElementById('countBtn');
+    const input    = document.getElementById('textInput');
+    const results  = document.getElementById('results');
+    const errorBox = document.getElementById('errorBox');
+    const totalEl  = document.getElementById('totalCount');
+    const gridEl   = document.getElementById('vowelGrid');
+
+    btn.addEventListener('click', async () => {
+      const text = input.value;
+
+      // Hide previous results/errors
+      results.classList.remove('show');
+      errorBox.classList.remove('show');
+      btn.disabled = true;
+      btn.textContent = 'Counting…';
+
+      try {
+        const res = await fetch('/api/count', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Something went wrong');
+        }
+
+        // Render results
+        totalEl.textContent = data.total;
+        gridEl.innerHTML = ['a','e','i','o','u'].map(v => `
+          <div class="vowel-cell">
+            <div class="letter">${v}</div>
+            <div class="count">${data[v]}</div>
+          </div>
+        `).join('');
+
+        results.classList.add('show');
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.classList.add('show');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Count Vowels';
+      }
+    });
+  </script>
+
+</body>
+</html>
